@@ -20,7 +20,7 @@ public class FastRGB {
 			pixelLength = 4;
 	}
 
-	int getRGB(int x, int y) {
+	public int getRGB(int x, int y) {
 		int pos = (y * pixelLength * width) + (x * pixelLength);
 		int argb = -16777216; // 255 alpha
 		if (hasAlphaChannel)
