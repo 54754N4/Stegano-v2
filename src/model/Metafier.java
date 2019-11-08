@@ -18,6 +18,7 @@ public class Metafier {
 	}
 	
 	public byte[] metafy(Payload payload) {
+		System.out.println(String.format("Pre-Infusion SHA256=%s", payload.hexChecksum()));
 		List<Byte> bytes = new ArrayList<>();
 		byte[] header = buildHeader(payload).getBytes(Charset.forName("UTF-8"));
 		for (byte b : header) bytes.add(b);
