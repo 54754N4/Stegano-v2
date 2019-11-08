@@ -1,45 +1,29 @@
 package model;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 
 import file.Payload;
 
 public class Metafier {
 	public static final int NOT_FOUND = -1;
-	public final String sep, hexSep;
+	public final String sep;
 	
 	public Metafier(String sep) {
 		this.sep = sep;
-		hexSep = byte2hex(sep.getBytes(Charset.forName("UTF-8"))[0]);
-	}
-	
-	public byte[] metafy(Payload payload) {
-		System.out.println(String.format("Pre-Infusion SHA256=%s", payload.hexChecksum()));
-		List<Byte> bytes = new ArrayList<>();
-		byte[] header = buildHeader(payload).getBytes(Charset.forName("UTF-8"));
-		for (byte b : header) bytes.add(b);
-		for (byte b : payload.file) bytes.add(b);
-		return subdivide(bytes);
-	}
-	
-	// x2 storage space we gain that all bytes are <16 now
-	// since we convert each byte to a 2 digit hex string
-	public byte[] subdivide(List<Byte> bytes) {
-		byte[] divided = new byte[bytes.size()*2];
-		int i=0;
-		for (String hexByte : bytes2hex(bytes)) {
-			divided[i++] = hex2byte(""+hexByte.charAt(0));
-			divided[i++] = hex2byte(""+hexByte.charAt(1));
-		}
-		System.out.println(String.format("Encoded %d bytes", divided.length));
-		return divided;
 	}
 
-	private String buildHeader(Payload payload) {
+	public byte[] metafy(Payload payload) {
+		System.out.println(String.format("Pre-Infusion SHA256=%s", payload.hexChecksum()));
+		byte[] header = buildHeader(payload).getBytes(Charset.forName("UTF-8")),
+			total = new byte[header.length+payload.file.length];
+		int c = 0;
+		for (byte b : header) total[c++] = b;
+		for (byte b : payload.file) total[c++] = b;
+		return total;
+	}
+	
+	protected String buildHeader(Payload payload) {
 		String chain = chain(5);
 		StringBuilder sb = new StringBuilder();
 		sb.append(chain);
@@ -54,13 +38,17 @@ public class Metafier {
 		return sb.toString();
 	}
 	
-	public byte[] merge(byte[] unpacked) {
-		System.out.println(String.format("Packing %d into %d bytes", unpacked.length, unpacked.length/2));
-		byte[] packed = new byte[unpacked.length/2];
-		int c=0;
-		for (int i=0; i<unpacked.length-1; i+=2)
-			packed[c++] = merge(unpacked[i], unpacked[i+1]);
-		return packed;
+	// x2 storage space we gain that all bytes are <16 now
+	// since we convert each byte to a 2 digit hex string
+	public byte[] subdivide(byte[] bytes) {
+		byte[] divided = new byte[bytes.length*2];
+		int i=0;
+		for (String hexByte : bytes2hex(bytes)) {
+			divided[i++] = hex2byte(""+hexByte.charAt(0));
+			divided[i++] = hex2byte(""+hexByte.charAt(1));
+		}
+		System.out.println(String.format("Encoded %d bytes", divided.length));
+		return divided;
 	}
 	
 	public static String singleHex(byte b) {
@@ -79,8 +67,12 @@ public class Metafier {
 		return hex2byte(String.format("%s%s", singleHex(high), singleHex(low)));
 	}
 	
-	public static String[] bytes2hex(List<Byte> bytes) {
-		String[] hex = new String[bytes.size()];
+	public byte[] merge(byte[] unpacked) {
+		return unpacked;
+	}
+	
+	public static String[] bytes2hex(byte[] bytes) {
+		String[] hex = new String[bytes.length];
 		int i=0;
 		for (Byte b : bytes) hex[i++] = byte2hex(b);
 		return hex;
@@ -124,22 +116,22 @@ public class Metafier {
 		return sublist;
 	}
 	
-	public int verify(List<Byte> unmergedBytes) {
-		return verify(0, unmergedBytes);
+	public int verify(List<Byte> bytes) {
+		return verify(0, bytes);
 	}
 	
 	
-	public int verify(byte[] unmergedBytes) {
-		return verify(0, unmergedBytes);
+	public int verify(byte[] bytes) {
+		return verify(0, bytes);
 	}
 	
 	// Have to duplicate code cause converting from byte[] to List<Byte> requires 2 passes over data
-	public int verify(int start, byte[] unmergedBytes) {
+	public int verify(int start, byte[] bytes) {
 		String pattern = "", match = "";
-		for (int i=0; i<5; i++) pattern += hexSep;
-		int pos = NOT_FOUND, count = 10; // cause chain = 5 and packets get split into 2 so 2*5
-		for (int i=start; i<unmergedBytes.length-count; i++, match="") {
-			for (int di=0; di<count; di++) match += unmergedBytes[i+di];
+		for (int i=0; i<5; i++) pattern += sep;
+		int pos = NOT_FOUND, count = pattern.length();
+		for (int i=start; i<bytes.length-count; i++, match="") {
+			for (int di=0; di<count; di++) match += bytes[i+di];
 			if (match.equals(pattern)) return i;
 		}
 		return pos;
@@ -151,23 +143,12 @@ public class Metafier {
 	 */
 	public int verify(int start, List<Byte> unmergedBytes) {
 		String pattern = "", match = "";
-		for (int i=0; i<5; i++) pattern += hexSep;
-		int pos = NOT_FOUND, count = 10; // cause chain = 5 and packets get split into 2 so 2*5
+		for (int i=0; i<5; i++) pattern += sep;
+		int pos = NOT_FOUND, count = pattern.length();
 		for (int i=start; i<unmergedBytes.size()-count; i++, match="") {
 			for (int di=0; di<count; di++) match += unmergedBytes.get(i+di);
 			if (match.equals(pattern)) return i;
 		}
 		return pos;
-	}
-	
-	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
-		String filename = "aFile.txt";
-		Payload payload = new Payload(filename);
-		Metafier m = new Metafier("#");
-		System.out.println(m.buildHeader(payload));
-		byte[] bytes = m.metafy(payload);
-		int index = m.verify(5, bytes);
-		for (int b : m.sublist(index,index+10, bytes)) 
-			System.out.println(b);
 	}
 }
