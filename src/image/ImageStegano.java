@@ -19,7 +19,7 @@ import image.errors.ImageWriterNotFoundException;
 import image.errors.InvalidChecksumException;
 import image.errors.NothingToExtractException;
 import image.errors.SmallResolutionException;
-import model.BytesParser;
+import model.ParsedResults;
 import model.Metafier;
 
 public class ImageStegano {
@@ -29,22 +29,11 @@ public class ImageStegano {
 		metafier = new Metafier(sep);
 	}
 	
-	public static void main(String[] args) throws ImageWriterNotFoundException, NoSuchAlgorithmException, IOException, InvalidChecksumException {
-		File image = new File("bigimagepf.bmp"),
-			payload = new File("aFile.txt"),
-			carrier;
-		String name = "newImage.png", format = "png"; // png is lossless <3
-		ImageStegano is = new ImageStegano("#");
-		carrier = is.hide(payload, image, name, format);
-		System.out.println(carrier);
-		System.out.println(is.extractFile(carrier));
-	}
-	
-	public BytesParser extractFile(File image) throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidChecksumException {
+	public ParsedResults extractFile(File image) throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidChecksumException {
 		byte[] hidden = extractHidden(image);
 		if (!hasHiddenData(hidden)) 
 			throw new NothingToExtractException();
-		return new BytesParser(metafier, hidden);
+		return new ParsedResults(metafier, hidden);
 	}
 	
 	// verifies if our encoded metafier chain is unpacked in the first pixels
