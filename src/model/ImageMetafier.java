@@ -20,8 +20,12 @@ public abstract class ImageMetafier extends Metafier {
 		super(sep);
 	}
 	
-	public void write(BufferedImage bimage, byte[] bytes, HidingHandler handler) throws IOException {
+	protected abstract PixelHidingHandler getHidingHandler();
+	protected abstract PixelUnhidingHandlder getUnhidingHandler();
+	
+	public void write(BufferedImage bimage, byte[] bytes) throws IOException {
 		List<Pixel> pixels = extractPixels(bimage);
+		PixelHidingHandler handler = getHidingHandler();
 		int c = 0;	//written bytes count
 		for (int x = 0; x < bimage.getWidth(); x++) 
             for (int y = 0; y < bimage.getHeight(); y++) 
@@ -45,9 +49,10 @@ public abstract class ImageMetafier extends Metafier {
 		return writeable;
 	}
 	
-	public byte[] extractHidden(File image, UnhidingHandlder handler) throws FileNotFoundException, IOException {
+	public byte[] extractHidden(File image) throws FileNotFoundException, IOException {
 		BufferedImage bimage = getWriteableImage(image);	
 		List<Pixel> pixels = extractPixels(bimage);
+		PixelUnhidingHandlder handler = getUnhidingHandler();
 		byte[] bytes = new byte[pixels.size()];
 		int c=0;
 		for (Pixel pixel : pixels) bytes[c++] = handler.unhide(pixel);
@@ -64,12 +69,12 @@ public abstract class ImageMetafier extends Metafier {
 	}
 	
 	@FunctionalInterface
-	public static interface HidingHandler {
+	public static interface PixelHidingHandler extends HidingHandler {
 		public Pixel hide(Pixel pixel, byte data);
 	}
 	
 	@FunctionalInterface
-	public static interface UnhidingHandlder {
+	public static interface PixelUnhidingHandlder extends UnhidingHandler {
 		public byte unhide(Pixel pixel);
 	}
 }

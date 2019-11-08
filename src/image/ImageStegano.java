@@ -31,13 +31,13 @@ public class ImageStegano {
 		byte[] bytes = metafier.metafy(new Payload(payload));
 		metafier.verifySize(bimage, bytes);
 		System.out.println("Size is valid, Encoding data..");
-		metafier.write(bimage, bytes, (pixel, data) -> pixel.hide(data));
+		metafier.write(bimage, bytes);
 		System.out.println("Encoded data, saving image..");
 		return save(bimage, name, format);
 	}
 	
 	public ParsedResults extractFile(File image) throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidChecksumException {
-		byte[] hidden = metafier.extractHidden(image, (pixel) -> (byte) pixel.unhide());
+		byte[] hidden = metafier.extractHidden(image);
 		if (!hasHiddenData(hidden)) 
 			throw new NothingToExtractException();
 		return new ParsedResults(metafier, hidden);

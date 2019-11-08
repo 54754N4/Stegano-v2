@@ -17,6 +17,16 @@ public class AlphaMetafier extends ImageMetafier {
 	}
 	
 	@Override
+	protected PixelHidingHandler getHidingHandler() {
+		return (pixel, data) -> pixel.hide(data);
+	}
+
+	@Override
+	protected PixelUnhidingHandlder getUnhidingHandler() {
+		return (pixel) -> (byte) pixel.unhide();
+	}
+	
+	@Override
 	public byte[] metafy(Payload payload) {
 		return subdivide(super.metafy(payload));
 	}

@@ -5,14 +5,14 @@ import java.util.List;
 
 import file.Payload;
 
-public class Metafier {
+public abstract class Metafier {
 	public static final int NOT_FOUND = -1;
 	public final String sep;
 	
 	public Metafier(String sep) {
 		this.sep = sep;
 	}
-
+	
 	public byte[] metafy(Payload payload) {
 		System.out.println(String.format("Pre-Infusion SHA256=%s", payload.hexChecksum()));
 		byte[] header = buildHeader(payload).getBytes(Charset.forName("UTF-8")),
@@ -151,4 +151,8 @@ public class Metafier {
 		}
 		return pos;
 	}
+	
+	public static interface HidingHandler {}
+	
+	public static interface UnhidingHandler {}
 }
