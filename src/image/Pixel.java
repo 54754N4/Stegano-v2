@@ -3,9 +3,7 @@ package image;
 import java.awt.Color;
 import java.util.Arrays;
 
-import image.errors.ImageAlreadyTransparentException;
-
-class Pixel {
+public class Pixel {
 	private Color colour;
 	private int alpha, red, green, blue;
 	
@@ -32,9 +30,9 @@ class Pixel {
 		return !(alpha == red && red == green && green == blue && blue == 255);
 	}
 	
-	public Pixel hide(int aByte) throws ImageAlreadyTransparentException {
+	public Pixel hide(int aByte) {
 		if (alpha != 255)
-			throw new ImageAlreadyTransparentException();
+			alpha = 255;
 		alpha -= aByte;
 		return this;
 	}
