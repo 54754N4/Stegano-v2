@@ -7,9 +7,8 @@ public class LSBMetafier extends AlphaMetafier {
 	}
 
 	@Override
-	protected Pixel hide(Pixel pixel, byte b) {
-		if (b > 0xF) System.out.println(b);
-		return pixel.hideLSB(b);
+	protected Pixel hide(Pixel pixel, int aByte) {
+		return pixel.hideLSB(aByte);
 	}
 
 	@Override

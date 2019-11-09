@@ -1,7 +1,11 @@
 package model;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import file.Payload;
 
@@ -13,15 +17,15 @@ public abstract class Metafier {
 		this.sep = sep;
 	}
 	
-	public byte[] metafy(Payload payload) {
+	public int[] metafy(Payload payload) {
 		System.out.println(String.format("Pre-Infusion SHA256=%s", payload.hexChecksum()));
 		String header = buildHeader(payload);
 //		System.out.println(String.format("Header=%s", header));
-		byte[] headerBytes = header.getBytes(Charset.forName("UTF-8")),
-			total = new byte[headerBytes.length+payload.file.length];
+		byte[] headerBytes = header.getBytes(Charset.forName("UTF-8"));
+		int[] total = new int[headerBytes.length+payload.fileBytes.length];
 		int c = 0;
 		for (byte b : headerBytes) total[c++] = b;
-		for (byte b : payload.file) total[c++] = b;
+		for (byte b : payload.fileBytes) total[c++] = b;
 		return total;
 	}
 	
@@ -35,15 +39,15 @@ public abstract class Metafier {
 		sb.append(sep);
 		sb.append(payload.hexChecksum());
 		sb.append(sep);
-		sb.append(payload.file.length);
+		sb.append(payload.fileBytes.length);
 		sb.append(chain);
 		return sb.toString();
 	}
 	
 	// x2 storage space we gain that all bytes are <16 now
 	// since we convert each byte to a 2 digit hex string
-	public byte[] subdivide(byte[] bytes) {
-		byte[] divided = new byte[bytes.length*2];
+	public int[] subdivide(int[] bytes) {
+		int[] divided = new int[bytes.length*2];
 		int i=0;
 		for (String hexByte : bytes2hex(bytes)) {
 			divided[i++] = hex2byte(""+hexByte.charAt(0));
@@ -65,18 +69,19 @@ public abstract class Metafier {
 		throw new IllegalArgumentException("Invalid byte argument "+b);
 	}
 	
-	public static byte merge(byte high, byte low) {
-		return hex2byte(String.format("%s%s", singleHex(high), singleHex(low)));
+	public static int merge(int high, int low) {
+		String hex = String.format("%s%s", singleHex((byte) (0x0F & high)), singleHex((byte) (0x0F & low)));
+		return hex2byte(hex);
 	}
 	
-	public byte[] merge(byte[] unpacked) {
+	public int[] merge(int[] unpacked) {
 		return unpacked;
 	}
 	
-	public static String[] bytes2hex(byte[] bytes) {
+	public static String[] bytes2hex(int[] bytes) {
 		String[] hex = new String[bytes.length];
 		int i=0;
-		for (Byte b : bytes) hex[i++] = byte2hex(b);
+		for (int b : bytes) hex[i++] = byte2hex(b);
 		return hex;
 	}
 	
@@ -94,12 +99,36 @@ public abstract class Metafier {
 		return ints;
 	}
 	
-	public static String byte2hex(byte b) {
-		return String.format("%02X", b);	// makes sure single digit are 0 padded
+	public static String byte2hex(int aByte) {
+		return String.format("%02X", aByte);	// makes sure single digit are 0 padded
 	}
 	
-	public static byte hex2byte(String c) {
-		return (byte) Integer.parseInt(c, 16);
+	public static byte halfHex2byte(char halfByte) {
+		return halfHex2byte(""+halfByte);
+	}
+	
+	public static byte halfHex2byte(String halfByte) {
+		String alphabet = "0123456789ABCDEF";
+		if (!alphabet.contains(halfByte))
+			throw new IllegalArgumentException("Valid hex alphabet is : "+alphabet);
+		switch (halfByte) {
+			case "A": return 10;
+			case "B": return 11;
+			case "C": return 12;
+			case "D": return 13;
+			case "E": return 14;
+			case "F": return 15;
+			default: return (byte) Integer.parseInt(halfByte);
+		}
+	}
+	
+	public static int hex2byte(String hex) {
+		if (hex.length() == 1)
+			return halfHex2byte(hex);
+		else if (hex.length() == 2) 
+			return (halfHex2byte(hex.charAt(0)) * 16 + halfHex2byte(hex.charAt(1)));
+		else
+			throw new IllegalArgumentException("Hex is bigger than a byte (>2 digits) :"+hex);
 	}
 	
 	public static byte[] bytes2bits(byte[] bytes) { // very wasteful in space, don't use preferably
@@ -129,30 +158,33 @@ public abstract class Metafier {
 		return sb.toString();
 	}
 	
-	public byte[] sublist(int start, int end, byte[] bytes) {
-		if (start > bytes.length || end < 0) return new byte[0];
+	public int[] sublist(int start, int end, int[] bytes) {
+		if (start > bytes.length || end < 0) return new int[0];
 		if (start < 0) start = 0;
 		if (end >= bytes.length) end = bytes.length;
-		byte[] sublist = new byte[end-start];
+		int[] sublist = new int[end-start];
 		for (int i=start; i<end; i++)
 			sublist[i-start] = bytes[i];
 		return sublist;
 	}
 	
-//	public int verify(List<Byte> bytes) {
-//		return verify(0, bytes);
-//	}
-//	
-	
-	public int verify(byte[] bytes) {
+	public int verify(int[] bytes) {
 		return verify(0, bytes);
+	}
+	
+	public static void writeToFile(String name, byte[] bytes) {	//debug
+		try (PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name))))) {
+			for (byte b : bytes) pw.println(b);		// for diffing purposes
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
 	 * @param unmergedBytes
 	 * @return index where chain pattern matched
 	 */
-	public int verify(int start, byte[] bytes) {
+	public int verify(int start, int[] bytes) {
 		String pattern = "", match = "";
 		for (int i=0; i<5; i++) pattern += sep;
 		int pos = NOT_FOUND, count = pattern.length();
@@ -162,19 +194,4 @@ public abstract class Metafier {
 		}
 		return pos;
 	}
-	
-//	public int verify(int start, List<Byte> unmergedBytes) {
-//	String pattern = "", match = "";
-//	for (int i=0; i<5; i++) pattern += sep;
-//	int pos = NOT_FOUND, count = pattern.length();
-//	for (int i=start; i<unmergedBytes.size()-count; i++, match="") {
-//		for (int di=0; di<count; di++) match += unmergedBytes.get(i+di);
-//		if (match.equals(pattern)) return i;
-//	}
-//	return pos;
-//}
-	
-	public static interface HidingHandler {}
-	
-	public static interface UnhidingHandler {}
 }

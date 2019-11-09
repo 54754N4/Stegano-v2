@@ -17,10 +17,10 @@ public abstract class ImageMetafier extends Metafier {
 		super(sep);
 	}
 	
-	protected abstract Pixel hide(Pixel pixel, byte b);
+	protected abstract Pixel hide(Pixel pixel, int aByte);
 	protected abstract int unhide(Pixel pixel);
 	
-	public void write(BufferedImage bimage, byte[] bytes) throws IOException {
+	public void write(BufferedImage bimage, int[] bytes) throws IOException {
 		Pixel[] pixels = extractPixels(bimage);
 		int c = 0;	//written bytes count
 		for (int x = 0; x < bimage.getWidth(); x++) 
@@ -30,16 +30,16 @@ public abstract class ImageMetafier extends Metafier {
 		System.out.println(String.format("Affected %d/%d pixels.", c, bimage.getWidth()*bimage.getHeight()));
 	} 
 	
-	public byte[] extractHidden(File image) throws IOException {
+	public int[] extractHidden(File image) throws IOException {
 		BufferedImage bimage = getWriteableImage(image);	
 		Pixel[] pixels = extractPixels(bimage);
-		byte[] bytes = new byte[pixels.length];
+		int[] bytes = new int[pixels.length];
 		int c=0;
 		for (Pixel pixel : pixels) bytes[c++] = (byte) unhide(pixel);
 		return bytes;
 	}
 	
-	public void verifySize(BufferedImage bimage, byte[] bytes) throws SmallResolutionException {
+	public void verifySize(BufferedImage bimage, int[] bytes) throws SmallResolutionException {
 		int totalPixels = bimage.getWidth() * bimage.getHeight();
 		if (bytes.length > totalPixels)
 			throw new SmallResolutionException(bytes.length, totalPixels);

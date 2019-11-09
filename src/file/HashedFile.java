@@ -14,11 +14,11 @@ import java.util.List;
 import javax.xml.bind.DatatypeConverter;
 
 public class HashedFile {
-	public final byte[] checksum, file;
+	public final byte[] checksum, fileBytes;
 	
 	public HashedFile(byte[] checksum, byte[] file) {
 		this.checksum = checksum;
-		this.file = file;
+		this.fileBytes = file;
 	}
 	
 	public HashedFile(File file) throws NoSuchAlgorithmException, IOException {
@@ -34,7 +34,7 @@ public class HashedFile {
 				bytes.add((byte) dis.read());
 		}
 		checksum = md.digest();
-		file = convert(bytes);
+		fileBytes = convert(bytes);
 	}
 	
 	public static byte[] sha256(byte[] bytes) throws NoSuchAlgorithmException {

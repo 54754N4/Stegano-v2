@@ -104,10 +104,7 @@ public class Pixel {
 	public static void main(String[] args) {
 		Pixel p = new Pixel(Color.DARK_GRAY);
 		byte b = (byte) 0xF;
-		while (b>=0) {
-			System.out.println(p);
-			System.out.println(p.hideLSB(b--));
-			System.out.println(p.unhideLSB());
-		}
+		while (b>=0)
+			System.out.println(p.hideLSB(b--).unhideLSB());
 	}
 }

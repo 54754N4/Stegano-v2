@@ -3,7 +3,6 @@ package image;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 import file.Payload;
 import model.ImageMetafier;
@@ -17,8 +16,8 @@ public class AlphaMetafier extends ImageMetafier {
 	}
 	
 	@Override
-	protected Pixel hide(Pixel pixel, byte b) {
-		return pixel.hideAlpha(b);
+	protected Pixel hide(Pixel pixel, int aByte) {
+		return pixel.hideAlpha(aByte);
 	}
 
 	@Override
@@ -27,17 +26,17 @@ public class AlphaMetafier extends ImageMetafier {
 	}
 	
 	@Override
-	public byte[] metafy(Payload payload) {
+	public int[] metafy(Payload payload) {
 		return subdivide(super.metafy(payload));
 	}
 	
 	@Override
-	public byte[] merge(byte[] unpacked) {
+	public int[] merge(int[] unpacked) {
 		System.out.println(String.format("Packing %d into %d bytes", unpacked.length, unpacked.length/2));
-		byte[] packed = new byte[unpacked.length/2];
+		int[] packed = new int[unpacked.length/2];
 		int c=0;
-		for (int i=0; i<unpacked.length-1; i+=2)
-			packed[c++] = merge(unpacked[i], unpacked[i+1]);
+		for (int i=0; i<unpacked.length-1; i+=2, c++)
+			packed[c] = merge(unpacked[i], unpacked[i+1]);
 		return packed;
 	}
 	
@@ -48,7 +47,7 @@ public class AlphaMetafier extends ImageMetafier {
 	 * @return index where chain pattern matched
 	 */
 	@Override
-	public int verify(int start, byte[] unmergedBytes) {
+	public int verify(int start, int[] unmergedBytes) {
 		String pattern = "", match = "";
 		for (int i=0; i<5; i++) pattern += hexSep;
 		int pos = NOT_FOUND, count = pattern.length();
@@ -58,26 +57,13 @@ public class AlphaMetafier extends ImageMetafier {
 		}
 		return pos;
 	}
-
-//	@Override
-//	public int verify(int start, List<Byte> unmergedBytes) {
-//		String pattern = "", match = "";
-//		for (int i=0; i<5; i++) pattern += hexSep;
-//		int pos = NOT_FOUND, count = pattern.length();
-//		for (int i=start; i<unmergedBytes.size()-count; i++, match="") {
-//			for (int di=0; di<count; di++) match += unmergedBytes.get(i+di);
-//			if (match.equals(pattern)) return i;
-//		}
-//		return pos;
-//	}
-
 	
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 		String filename = "aFile.txt";
 		Payload payload = new Payload(filename);
 		AlphaMetafier m = new AlphaMetafier("#");
 		System.out.println(m.buildHeader(payload));
-		byte[] bytes = m.metafy(payload);
+		int[] bytes = m.metafy(payload);
 		int index = m.verify(5, bytes);
 		for (int b : m.sublist(index,index+10, bytes)) 
 			System.out.println(b);
