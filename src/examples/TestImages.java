@@ -13,7 +13,7 @@ import model.ParsedResults;
 public class TestImages {
 
 	public static void main(String[] args) throws ImageWriterNotFoundException, NoSuchAlgorithmException, IOException, InvalidChecksumException {
-		File image = new File("bigimagepf.bmp"),					// image to hide into
+		File image = new File("bigimagepf.bmp"),						// image to hide into
 			payload = new File("aFile.txt");						// file to hide 
 		ImageStegano is = new ImageStegano(new AlphaMetafier("#"));	// separator-> metadata + payload 
 		File carrier = is.hide(payload, image, "newImage.png","png"); 

@@ -19,19 +19,13 @@ public class ParsedResults {
 	public ParsedResults(Metafier metafier, byte[] bytes) throws NoSuchAlgorithmException, IOException, InvalidChecksumException {
 		this.metafier = metafier;
 		this.bytes = bytes;
-		separatePayload(separateHeader(bytes));
-	}
-
-	private int separateHeader(byte[] hidden) {
-		int chain = metafier.verify(10, hidden), end = chain+10;
-		byte[] unmerged = new byte[end];
-		for (int i=0; i<end; i++)
-			unmerged[i] = hidden[i];
-		parseHeader(unmerged);
-		return end;
+		separatePayload(parseHeader(bytes));
 	}
 	
-	private void parseHeader(byte[] unmerged) {
+	private int parseHeader(byte[] hidden) {
+		int chain = metafier.verify(10, hidden), end = chain+10;
+		byte[] unmerged = new byte[end];
+		for (int i=0; i<end; i++) unmerged[i] = hidden[i];
 		header = metafier.merge(unmerged);
 		subdivisions = Integer.parseInt(new String(new byte[] {header[5]}));
 		format = new String(metafier.sublist(7, 10, header));
@@ -39,6 +33,7 @@ public class ParsedResults {
 		length = Integer.parseInt(
 			new String(metafier.sublist(76, header.length, header))
 				.replaceAll(metafier.sep, ""));
+		return end;
 	}
 	
 	private void separatePayload(int start) throws NoSuchAlgorithmException, IOException, InvalidChecksumException {

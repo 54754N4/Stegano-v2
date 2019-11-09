@@ -3,6 +3,8 @@ package image;
 import java.awt.Color;
 import java.util.Arrays;
 
+import model.Metafier;
+
 public class Pixel {
 	private Color colour;
 	private int alpha, red, green, blue;
@@ -26,11 +28,55 @@ public class Pixel {
 		return alpha;
 	}
 	
+	public int getRed() {
+		return red;
+	}
+	
+	public int getGreen() {
+		return green;
+	}
+	
+	public int getBlue() {
+		return blue;
+	}
+	
 	public boolean notWhite() {
 		return !(alpha == red && red == green && green == blue && blue == 255);
 	}
 	
-	public Pixel hide(int aByte) {
+	public Pixel hideLSB(int halfByte) {
+		for (int i=0; i<4; i++) {
+			int bit = Metafier.getBit(halfByte, i);
+			switch (i) {
+				case 0: alpha = toggleLSB(alpha, bit, 0); break;
+				case 1: red = toggleLSB(red, bit, 0); break;
+				case 2: green = toggleLSB(green, bit, 0); break;
+				default: blue = toggleLSB(blue, bit, 0); break;
+			}
+		}
+		return this;
+	}
+	
+	public int unhideLSB() {
+		int halfByte = 0, bit;
+		for (int i=0; i<4; i++) {
+			switch (i) {
+				case 0: bit = Metafier.getBit(alpha, 0); break;
+				case 1: bit = Metafier.getBit(red, 0); break;
+				case 2: bit = Metafier.getBit(green, 0); break;
+				default: bit = Metafier.getBit(blue, 0); break;
+			}
+			halfByte = toggleLSB(halfByte, bit, i);
+		}
+		return halfByte;
+	}
+	
+	private int toggleLSB(int aByte, int bit, int offset) {
+		return (bit == 1) ? 
+			Metafier.setBit(aByte, offset) : Metafier.clearBit(aByte, offset);
+	}
+	
+	public Pixel hideAlpha(int aByte) {
 		if (alpha != 255)
 			alpha = 255;
 		alpha -= aByte;
@@ -53,5 +99,15 @@ public class Pixel {
 	
 	public String toString() {
 		return Arrays.toString(new int[]{red, green, blue, alpha});
+	}
+	
+	public static void main(String[] args) {
+		Pixel p = new Pixel(Color.DARK_GRAY);
+		byte b = (byte) 0xF;
+		while (b>=0) {
+			System.out.println(p);
+			System.out.println(p.hideLSB(b--));
+			System.out.println(p.unhideLSB());
+		}
 	}
 }

@@ -15,10 +15,12 @@ public abstract class Metafier {
 	
 	public byte[] metafy(Payload payload) {
 		System.out.println(String.format("Pre-Infusion SHA256=%s", payload.hexChecksum()));
-		byte[] header = buildHeader(payload).getBytes(Charset.forName("UTF-8")),
-			total = new byte[header.length+payload.file.length];
+		String header = buildHeader(payload);
+//		System.out.println(String.format("Header=%s", header));
+		byte[] headerBytes = header.getBytes(Charset.forName("UTF-8")),
+			total = new byte[headerBytes.length+payload.file.length];
 		int c = 0;
-		for (byte b : header) total[c++] = b;
+		for (byte b : headerBytes) total[c++] = b;
 		for (byte b : payload.file) total[c++] = b;
 		return total;
 	}
@@ -63,7 +65,7 @@ public abstract class Metafier {
 		throw new IllegalArgumentException("Invalid byte argument "+b);
 	}
 	
-	public byte merge(byte high, byte low) {
+	public static byte merge(byte high, byte low) {
 		return hex2byte(String.format("%s%s", singleHex(high), singleHex(low)));
 	}
 	
@@ -100,6 +102,27 @@ public abstract class Metafier {
 		return (byte) Integer.parseInt(c, 16);
 	}
 	
+	public static byte[] bytes2bits(byte[] bytes) { // very wasteful in space, don't use preferably
+		byte[] bits = new byte[bytes.length*8];
+		int c=0;
+		for (byte b : bytes) 
+			for (int offset=0; offset<8; offset++)
+				bits[c++] = (byte) getBit(b, offset);
+		return bits;
+	}
+	
+	public static int getBit(int n, int offset) {
+		return ((n >> offset) & 1);
+	}
+	
+	public static int setBit(int n, int offset) {
+		return (n |= 1 << offset);
+	}
+	
+	public static int clearBit(int n, int offset) {
+		return (n &= ~(1 << offset));
+	}
+	
 	public String chain(int n) {
 		StringBuilder sb = new StringBuilder();
 		while (n-->0) sb.append(sep);
@@ -116,16 +139,19 @@ public abstract class Metafier {
 		return sublist;
 	}
 	
-	public int verify(List<Byte> bytes) {
-		return verify(0, bytes);
-	}
-	
+//	public int verify(List<Byte> bytes) {
+//		return verify(0, bytes);
+//	}
+//	
 	
 	public int verify(byte[] bytes) {
 		return verify(0, bytes);
 	}
 	
-	// Have to duplicate code cause converting from byte[] to List<Byte> requires 2 passes over data
+	/**
+	 * @param unmergedBytes
+	 * @return index where chain pattern matched
+	 */
 	public int verify(int start, byte[] bytes) {
 		String pattern = "", match = "";
 		for (int i=0; i<5; i++) pattern += sep;
@@ -137,20 +163,16 @@ public abstract class Metafier {
 		return pos;
 	}
 	
-	/**
-	 * @param unmergedBytes
-	 * @return index where chain pattern matched
-	 */
-	public int verify(int start, List<Byte> unmergedBytes) {
-		String pattern = "", match = "";
-		for (int i=0; i<5; i++) pattern += sep;
-		int pos = NOT_FOUND, count = pattern.length();
-		for (int i=start; i<unmergedBytes.size()-count; i++, match="") {
-			for (int di=0; di<count; di++) match += unmergedBytes.get(i+di);
-			if (match.equals(pattern)) return i;
-		}
-		return pos;
-	}
+//	public int verify(int start, List<Byte> unmergedBytes) {
+//	String pattern = "", match = "";
+//	for (int i=0; i<5; i++) pattern += sep;
+//	int pos = NOT_FOUND, count = pattern.length();
+//	for (int i=start; i<unmergedBytes.size()-count; i++, match="") {
+//		for (int di=0; di<count; di++) match += unmergedBytes.get(i+di);
+//		if (match.equals(pattern)) return i;
+//	}
+//	return pos;
+//}
 	
 	public static interface HidingHandler {}
 	

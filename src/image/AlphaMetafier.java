@@ -17,13 +17,13 @@ public class AlphaMetafier extends ImageMetafier {
 	}
 	
 	@Override
-	protected PixelHidingHandler getHidingHandler() {
-		return (pixel, data) -> pixel.hide(data);
+	protected Pixel hide(Pixel pixel, byte b) {
+		return pixel.hideAlpha(b);
 	}
 
 	@Override
-	protected PixelUnhidingHandlder getUnhidingHandler() {
-		return (pixel) -> (byte) pixel.unhide();
+	protected int unhide(Pixel pixel) {
+		return pixel.unhide();
 	}
 	
 	@Override
@@ -41,44 +41,36 @@ public class AlphaMetafier extends ImageMetafier {
 		return packed;
 	}
 	
-	@Override
-	public int verify(List<Byte> unmergedBytes) {
-		return verify(0, unmergedBytes);
-	}
-	
-	@Override
-	public int verify(byte[] unmergedBytes) {
-		return verify(0, unmergedBytes);
-	}
-	
-	// Have to duplicate code cause converting from byte[] to List<Byte> requires 2 passes over data
+	/** 
+	 * Have to duplicate code cause converting from byte[] 
+	 * to List<Byte> would require 2 passes over data
+	 * @param unmergedBytes
+	 * @return index where chain pattern matched
+	 */
 	@Override
 	public int verify(int start, byte[] unmergedBytes) {
 		String pattern = "", match = "";
 		for (int i=0; i<5; i++) pattern += hexSep;
-		int pos = NOT_FOUND, count = 10; // cause chain = 5 and packets get split into 2 so 2*5
+		int pos = NOT_FOUND, count = pattern.length();
 		for (int i=start; i<unmergedBytes.length-count; i++, match="") {
 			for (int di=0; di<count; di++) match += unmergedBytes[i+di];
 			if (match.equals(pattern)) return i;
 		}
 		return pos;
 	}
-	
-	/**
-	 * @param unmergedBytes
-	 * @return index where chain pattern matched
-	 */
-	@Override
-	public int verify(int start, List<Byte> unmergedBytes) {
-		String pattern = "", match = "";
-		for (int i=0; i<5; i++) pattern += hexSep;
-		int pos = NOT_FOUND, count = 10; // cause chain = 5 and packets get split into 2 so 2*5
-		for (int i=start; i<unmergedBytes.size()-count; i++, match="") {
-			for (int di=0; di<count; di++) match += unmergedBytes.get(i+di);
-			if (match.equals(pattern)) return i;
-		}
-		return pos;
-	}
+
+//	@Override
+//	public int verify(int start, List<Byte> unmergedBytes) {
+//		String pattern = "", match = "";
+//		for (int i=0; i<5; i++) pattern += hexSep;
+//		int pos = NOT_FOUND, count = pattern.length();
+//		for (int i=start; i<unmergedBytes.size()-count; i++, match="") {
+//			for (int di=0; di<count; di++) match += unmergedBytes.get(i+di);
+//			if (match.equals(pattern)) return i;
+//		}
+//		return pos;
+//	}
+
 	
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 		String filename = "aFile.txt";
