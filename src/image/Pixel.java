@@ -3,7 +3,7 @@ package image;
 import java.awt.Color;
 import java.util.Arrays;
 
-import model.Metafier;
+import util.BitsUtil;
 
 public class Pixel {
 	private Color colour;
@@ -21,7 +21,11 @@ public class Pixel {
 		green = colour.getGreen();		// ((ARGB & 0x0000ff00) >> 8);
 		blue = colour.getBlue();		// (ARGB & 0x000000ff);
 		if (ARGB != toARGB()) 
-			System.out.println("WTF");
+			System.out.println("WTF");	// should never print but just in cased we messed up
+	}
+	
+	public int[] getComponents() {
+		return new int[] {alpha,red,green,blue};
 	}
 	
 	public int getAlpha() {
@@ -44,36 +48,35 @@ public class Pixel {
 		return !(alpha == red && red == green && green == blue && blue == 255);
 	}
 	
-	public Pixel hideLSB(int halfByte) {
+	public Pixel hideLSB(byte halfByte) {
+		if (halfByte > 0xF || halfByte < 0) throw new IllegalArgumentException("Invalid half byte : "+halfByte);
+		String binary = "";
 		for (int i=0; i<4; i++) {
-			int bit = Metafier.getBit(halfByte, i);
+			int bit = BitsUtil.getBit(halfByte, i);
+			binary = bit+binary;
 			switch (i) {
-				case 0: alpha = toggleLSB(alpha, bit, 0); break;
-				case 1: red = toggleLSB(red, bit, 0); break;
-				case 2: green = toggleLSB(green, bit, 0); break;
-				default: blue = toggleLSB(blue, bit, 0); break;
+				case 0: alpha = BitsUtil.toggleBit(alpha, bit, 0); break;
+				case 1: red = BitsUtil.toggleBit(red, bit, 0); break;
+				case 2: green = BitsUtil.toggleBit(green, bit, 0); break;
+				default: blue = BitsUtil.toggleBit(blue, bit, 0); break;
 			}
 		}
+//		System.out.println(binary+" "+halfByte);
 		return this;
 	}
 	
-	public int unhideLSB() {
+	public byte unhideLSB() {
 		int halfByte = 0, bit;
 		for (int i=0; i<4; i++) {
 			switch (i) {
-				case 0: bit = Metafier.getBit(alpha, 0); break;
-				case 1: bit = Metafier.getBit(red, 0); break;
-				case 2: bit = Metafier.getBit(green, 0); break;
-				default: bit = Metafier.getBit(blue, 0); break;
+				case 0: bit = BitsUtil.getBit(alpha, 0); break;
+				case 1: bit = BitsUtil.getBit(red, 0); break;
+				case 2: bit = BitsUtil.getBit(green, 0); break;
+				default: bit = BitsUtil.getBit(blue, 0); break;
 			}
-			halfByte = toggleLSB(halfByte, bit, i);
+			halfByte = (byte) BitsUtil.toggleBit(halfByte, bit, i);
 		}
-		return halfByte;
-	}
-	
-	private int toggleLSB(int aByte, int bit, int offset) {
-		return (bit == 1) ? 
-			Metafier.setBit(aByte, offset) : Metafier.clearBit(aByte, offset);
+		return (byte) halfByte;
 	}
 	
 	public Pixel hideAlpha(int aByte) {
@@ -83,10 +86,10 @@ public class Pixel {
 		return this;
 	}
 	
-	public int unhide() {
+	public byte unhide() {
 		int aByte = 255 - alpha;
 		alpha = 255;
-		return aByte;
+		return (byte) (aByte & 0xFF);
 	}
 	
 	public int toARGB() {
@@ -98,13 +101,15 @@ public class Pixel {
 	}
 	
 	public String toString() {
-		return Arrays.toString(new int[]{red, green, blue, alpha});
+		return Arrays.toString(getComponents());
 	}
 	
 	public static void main(String[] args) {
 		Pixel p = new Pixel(Color.DARK_GRAY);
-		byte b = (byte) 0xF;
-		while (b>=0)
-			System.out.println(p.hideLSB(b--).unhideLSB());
+		byte b = (byte) 0;
+		while (true) {
+			System.out.println(p.hideLSB(b).unhideLSB() == b);
+			System.out.println(b++);
+		}
 	}
 }

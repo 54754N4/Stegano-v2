@@ -28,7 +28,7 @@ public class ImageStegano {
 	
 	public File hide(File payload, File image, String name, String format) throws ImageWriterNotFoundException, IOException, NoSuchAlgorithmException {
 		BufferedImage bimage = ImageMetafier.getWriteableImage(image);
-		int[] bytes = metafier.metafy(new Payload(payload));
+		byte[] bytes = metafier.metafy(new Payload(payload));
 		metafier.verifySize(bimage, bytes);
 		System.out.println("Size is valid, Encoding data..");
 		metafier.write(bimage, bytes);
@@ -37,15 +37,15 @@ public class ImageStegano {
 	}
 	
 	public ParsedResults extractFile(File image) throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidChecksumException {
-		int[] hidden = metafier.extractHidden(image);
+		byte[] hidden = metafier.extractHidden(image);
 		if (!hasHiddenData(hidden)) 
 			throw new NothingToExtractException();
 		return new ParsedResults(metafier, hidden);
 	}
 	
 	// verifies if our encoded metafier chain is unpacked in the first pixels
-	public boolean hasHiddenData(int[] bytes) throws NoSuchAlgorithmException, IOException {
-		int[] topBytes = metafier.sublist(0, 100, bytes);
+	public boolean hasHiddenData(byte[] bytes) throws NoSuchAlgorithmException, IOException {
+		byte[] topBytes = metafier.sublist(0, 100, bytes);
 		return metafier.verify(topBytes) != Metafier.NOT_FOUND;
 	}
 	
