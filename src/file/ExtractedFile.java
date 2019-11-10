@@ -4,7 +4,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 
@@ -24,10 +23,10 @@ public class ExtractedFile extends HashedFile {
 		return file;
 	}
 	
-	public Path writeToFile(String filename) throws IOException {
+	public File writeToFile(String filename) throws IOException {
 		try (BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(filename))) {
 		    stream.write(fileBytes);
 		}
-		return Paths.get(filename);
+		return Paths.get(filename).toFile();
 	}
 }
