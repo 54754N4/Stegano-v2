@@ -1,15 +1,23 @@
 package util;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class Test {
 	public static boolean allUnder(int i, byte[] bytes) {
 		for (byte b : bytes) if (b > i) return false;
 		return true;
+	}
+	
+	public static void append(String str, File file) throws IOException {
+		try (BufferedWriter br = new BufferedWriter(new FileWriter(file, true))) {
+			br.append(str);
+		}
 	}
 	
 	public static void test(File file) throws FileNotFoundException, IOException {

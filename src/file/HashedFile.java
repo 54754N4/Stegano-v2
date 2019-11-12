@@ -37,6 +37,29 @@ public class HashedFile {
 		fileBytes = convert(bytes);
 	}
 	
+	public HashedFile(byte[] bytes) throws NoSuchAlgorithmException {
+	    this(sha256(bytes), bytes);
+	}
+	
+	public HashedFile(Object[] any) throws NoSuchAlgorithmException {
+		this(convertToBytes(any));
+	}
+	
+	private static byte[] convertToBytes(Object[] any) {
+		List<byte[]> preconverted = new ArrayList<>();
+		for (Object a : any) preconverted.add(a.toString().getBytes());
+		long total = 0;
+		for (byte[] bytes : preconverted) total += bytes.length;
+		if (total > Integer.MAX_VALUE)
+			throw new IllegalStateException("Java can't create arrays that big");
+		byte[] bytes = new byte[(int) total];
+		int c=0;
+		for (byte[] bs: preconverted) for (byte b : bs) bytes[c++] = b;
+		return bytes;
+	}
+	
+	
+	
 	public static byte[] sha256(byte[] bytes) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		md.update(bytes);

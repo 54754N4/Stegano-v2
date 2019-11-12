@@ -16,7 +16,7 @@ public class ExtractedFile extends HashedFile {
 	}
 	
 	public ExtractedFile(byte[] bytes) throws NoSuchAlgorithmException {
-	    super(sha256(bytes), bytes);
+	    super(bytes);
 	}
 	
 	public File getFile() {

@@ -67,8 +67,14 @@ public class Conversions {
 		throw new IllegalArgumentException("Invalid byte argument "+b);
 	}
 
-	public static byte merge(byte high, byte low) {
-		String hex = String.format("%s%s", singleHex(high), singleHex(low));
+	public static byte merge(byte first, byte second) {
+		return merge(first, second, false);
+	}
+	
+	public static byte merge(byte first, byte second, boolean littleEndian) {
+		String hex;
+		if (littleEndian) hex = String.format("%s%s", singleHex(second), singleHex(first)); 
+		else hex = String.format("%s%s", singleHex(first), singleHex(second));	
 		return hex2byte(hex);
 	}
 

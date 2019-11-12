@@ -5,8 +5,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import file.ExtractedFile;
+import image.errors.ExtractingLengthFailedException;
 import image.errors.InvalidChecksumException;
 
 public class ParsedResults {
@@ -23,7 +26,7 @@ public class ParsedResults {
 		separatePayload(parseHeader(bytes));
 	}
 	
-	private int parseHeader(byte[] hidden) {
+	private int parseHeader(byte[] hidden) throws ExtractingLengthFailedException {
 		int chain = metafier.verify(10, hidden), end = chain+10;
 		byte[] unmerged = new byte[end];
 		for (int i=0; i<end; i++) unmerged[i] = hidden[i];
@@ -34,9 +37,10 @@ public class ParsedResults {
 		System.out.println(String.format("Format=%s", format));
 		checksum = new String(metafier.sublist(11, 75, header)).toUpperCase();
 		System.out.println(String.format("Header Checksum=%s", checksum));
-		length = Integer.parseInt(
-			new String(metafier.sublist(76, header.length, header))
-				.replaceAll(metafier.sep, ""));
+		Matcher m = Pattern.compile("\\d+")	// extract length only (digits)
+			.matcher(new String(metafier.sublist(76, header.length, header)));
+		if (!m.find()) throw new ExtractingLengthFailedException();
+		length = Integer.parseInt(m.group());
 		System.out.println(String.format("Bytes length=%d", length));
 		return end;
 	}

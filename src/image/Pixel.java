@@ -3,6 +3,7 @@ package image;
 import java.awt.Color;
 import java.util.Arrays;
 
+import image.errors.ImageAlreadyTransparentException;
 import util.BitsUtil;
 
 public class Pixel {
@@ -50,10 +51,8 @@ public class Pixel {
 	
 	public Pixel hideLSB(byte halfByte) {
 		if (halfByte > 0xF || halfByte < 0) throw new IllegalArgumentException("Invalid half byte : "+halfByte);
-		String binary = "";
 		for (int i=0; i<4; i++) {
 			int bit = BitsUtil.getBit(halfByte, i);
-			binary = bit+binary;
 			switch (i) {
 				case 0: alpha = BitsUtil.toggleBit(alpha, bit, 0); break;
 				case 1: red = BitsUtil.toggleBit(red, bit, 0); break;
@@ -61,27 +60,44 @@ public class Pixel {
 				default: blue = BitsUtil.toggleBit(blue, bit, 0); break;
 			}
 		}
-//		System.out.println(binary+" "+halfByte);
 		return this;
 	}
 	
 	public byte unhideLSB() {
+		int[] component = getComponents();
 		int halfByte = 0, bit;
 		for (int i=0; i<4; i++) {
-			switch (i) {
-				case 0: bit = BitsUtil.getBit(alpha, 0); break;
-				case 1: bit = BitsUtil.getBit(red, 0); break;
-				case 2: bit = BitsUtil.getBit(green, 0); break;
-				default: bit = BitsUtil.getBit(blue, 0); break;
-			}
-			halfByte = (byte) BitsUtil.toggleBit(halfByte, bit, i);
+			bit = BitsUtil.getBit(component[i], 0);
+			halfByte = BitsUtil.toggleBit(halfByte, bit, i);
 		}
 		return (byte) halfByte;
 	}
+
+	public Pixel hideLSB2(byte b) {
+		for (int i=0; i<4; i++) {
+			int bits = BitsUtil.getBits(b, i*2, (1+i)*2);
+			switch (i) {
+				case 0: alpha = BitsUtil.copy(alpha, bits, 2); break;
+				case 1: red = BitsUtil.copy(red, bits, 2); break;
+				case 2: green = BitsUtil.copy(green, bits, 2); break;
+				default: blue = BitsUtil.copy(blue, bits, 2); break;
+			}
+		}
+		return this;
+	}
 	
-	public Pixel hideAlpha(int aByte) {
-		if (alpha != 255)
-			alpha = 255;
+	public byte unhideLSB2() {
+		int[] component = getComponents();
+		int aByte = 0, bits;
+		for (int i=0; i<4; i++) {
+			bits = BitsUtil.getBits(component[i], 2);
+			aByte += bits << i*2;
+		}
+		return (byte) aByte;
+	}
+	
+	public Pixel hideAlpha(int aByte) throws ImageAlreadyTransparentException {
+		if (alpha != 255) throw new ImageAlreadyTransparentException();
 		alpha -= aByte;
 		return this;
 	}
@@ -100,16 +116,23 @@ public class Pixel {
 		return alpha == p.alpha && red == p.red && green == p.green && blue == p.blue; 
 	}
 	
+	public String toBinaryString() {
+		StringBuilder sb = new StringBuilder("[");
+		for (int component : getComponents()) sb.append(Integer.toBinaryString(component)+",");
+		return sb.deleteCharAt(sb.length()-1).append("]").toString();
+	}
+	
 	public String toString() {
 		return Arrays.toString(getComponents());
 	}
 	
 	public static void main(String[] args) {
-		Pixel p = new Pixel(Color.DARK_GRAY);
+		Pixel p;
 		byte b = (byte) 0;
-		while (true) {
-			System.out.println(p.hideLSB(b).unhideLSB() == b);
-			System.out.println(b++);
+		while (++b != 0) {
+			p = new Pixel(Color.WHITE);
+			if (p.hideLSB2(b).unhideLSB2() != b)
+				System.out.println(p.toBinaryString());
 		}
 	}
 }

@@ -1,27 +1,30 @@
 package image;
 
+import util.Conversions;
+
 public class LSBMetafier extends AlphaMetafier {
-	
+
 	public LSBMetafier(String sep) {
 		super(sep);
 	}
 
 	@Override
 	protected Pixel hide(Pixel pixel, byte b) {
-		pixel.hideLSB(b);
-		if (pixel.unhideLSB() != b) {
-			System.out.println(pixel);
-			System.out.println(String.format("%d != %d", b, pixel.unhideLSB()));
-		}
-		return pixel;
+		return pixel.hideLSB(b);
 	}
 
 	@Override
 	protected byte unhide(Pixel pixel) {
-		if (pixel.unhideLSB() > 15) System.out.println(pixel+" + "+pixel.unhideLSB());
-		for (int component : pixel.getComponents())
-			if (component < 0)
-				System.out.println("U"+pixel);
 		return pixel.unhideLSB();
+	}
+	
+	@Override
+	public byte[] merge(byte[] unpacked) {	// somehow bytes aren't the same afterwards.. = broken
+		System.out.println(String.format("Packing %d into %d bytes", unpacked.length, unpacked.length/2));
+		byte[] packed = new byte[unpacked.length/2];
+		int c=0;
+		for (int i=0; i<unpacked.length-1; i+=2)
+			packed[c++] = Conversions.merge(unpacked[i], unpacked[i+1]);
+		return packed;
 	}
 }
