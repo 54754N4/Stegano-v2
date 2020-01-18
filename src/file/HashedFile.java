@@ -22,7 +22,7 @@ public class HashedFile {
 	}
 	
 	public HashedFile(File file) throws NoSuchAlgorithmException, IOException {
-		this(file.getName());
+		this(file.getPath());
 	}
 	
 	public HashedFile(String filename) throws IOException, NoSuchAlgorithmException {

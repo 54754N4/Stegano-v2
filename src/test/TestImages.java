@@ -11,8 +11,8 @@ import model.ParsedResults;
 
 //check dickbaldwin.com
 public class TestImages {
-	private static final File image = new File("bigimagepf.bmp"),						// image to hide into
-		payload = new File("aFile.txt");							// file to hide
+	private static final File image = new File("res/bigimagepf.bmp"),						// image to hide into
+		payload = new File("res/aFile.txt");							// file to hide
 	
 	public static void main(String[] args) throws Exception {
 		testAlpha();
@@ -24,7 +24,7 @@ public class TestImages {
 	
 	public static void testAlpha() throws Exception {
 		ImageStegano is = new ImageStegano(new AlphaTranscoder("#", 2));		// separator-> metadata + payload 
-		File carrier = is.hide(payload, image, "newImage.png","png"); 
+		File carrier = is.hide(payload, image, "res/newImage.png","png"); 
 		System.out.println("Carrier="+carrier.getName());			
 		
 		ParsedResults extracted = is.extractFile(carrier);				// extracts data from carrier file
@@ -33,7 +33,7 @@ public class TestImages {
 	
 	public static void testLSB() throws Exception {
 		ImageStegano is = new ImageStegano(new LSBTranscoder("#", 2, Target.BLUE));		// separator-> metadata + payload 
-		File carrier = is.hide(payload, image, "newImage.png","png"); 
+		File carrier = is.hide(payload, image, "res/newImage.png","png"); 
 		System.out.println("Carrier="+carrier.getName());			
 		
 		ParsedResults extracted = is.extractFile(carrier);				// extracts data from carrier file
@@ -42,7 +42,7 @@ public class TestImages {
 	
 	public static void testLSB2() throws Exception {
 		ImageStegano is = new ImageStegano(new BatchLSBTranscoder("#", 2));		// separator-> metadata + payload 
-		File carrier = is.hide(payload, image, "newImage.png","png"); 
+		File carrier = is.hide(payload, image, "res/newImage.png","png"); 
 		System.out.println("Carrier="+carrier.getName());			
 		
 		ParsedResults extracted = is.extractFile(carrier);				// extracts data from carrier file

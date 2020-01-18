@@ -57,7 +57,7 @@ public class ParsedResults {
 		for (int i=start, c=0; i<start+unmerged.length; i++, c++) unmerged[c] = bytes[i];
 		payload = metafier.merge(unmerged);
 		extracted = new ExtractedFile(payload);
-		file = extracted.writeToFile("extracted."+format);
+		file = extracted.writeToFile("res/extracted."+format);
 		if (!checksum.equals(extracted.hexChecksum())) 
 			throw new InvalidChecksumException(
 				String.format("%nHeader=\t\t%s%nExtracted=\t%s", checksum, extracted.hexChecksum()));

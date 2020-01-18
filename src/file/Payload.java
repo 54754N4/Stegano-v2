@@ -8,7 +8,7 @@ public class Payload extends HashedFile {
 	public final String format;
 	
 	public Payload(File file) throws NoSuchAlgorithmException, IOException {
-		this(file.getName());
+		this(file.getPath());
 	}
 	
 	public Payload(String filename) throws NoSuchAlgorithmException, IOException {
