@@ -1,8 +1,8 @@
 # Stegano
 A java project to compile multiple stegano techniques
 
-# Supported Formats
-Currently supported audio formats:
+# Supported
+Audio formats:
 > Tested: WAV
 
 > Untested: AIFF, AU, MIDI Type 0, MIDI Type 1 and RMF 
