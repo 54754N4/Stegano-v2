@@ -1,4 +1,4 @@
-package audio.error;
+package error.audio;
 
 import java.io.IOException;
 

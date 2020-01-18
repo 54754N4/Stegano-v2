@@ -1,9 +1,9 @@
-package image;
+package model.image;
 
 import java.awt.Color;
 import java.util.Arrays;
 
-import image.error.ImageAlreadyTransparentException;
+import error.image.ImageAlreadyTransparentException;
 
 public class Pixel {
 	public static enum Target { ALPHA, RED, GREEN, BLUE };

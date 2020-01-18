@@ -1,10 +1,7 @@
-package model;
+package model.image;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
@@ -12,14 +9,13 @@ import javax.imageio.ImageReader;
 import javax.imageio.ImageWriter;
 
 import file.Payload;
-import image.PixelTranscoder;
-import image.error.InvalidChecksumException;
-import image.error.NothingToExtractException;
+import model.Stegano;
 
-public class ImageStegano {
+public class ImageStegano extends Stegano {
 	private PixelTranscoder metafier;
 	
 	public ImageStegano(PixelTranscoder metafier) {
+		super(metafier);
 		this.metafier = metafier;
 	}
 	
@@ -31,19 +27,6 @@ public class ImageStegano {
 		metafier.write(bimage, bytes);
 		System.out.println("Encoded data, saving image..");
 		return metafier.save(bimage, name, format);
-	}
-	
-	public ParsedResults extractFile(File image) throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidChecksumException {
-		byte[] hidden = metafier.extractHidden(image);
-		if (!hasHiddenData(hidden)) 
-			throw new NothingToExtractException();
-		return new ParsedResults(metafier, hidden);
-	}
-	
-	// verifies if our encoded metafier chain is unpacked in the first bytes
-	public boolean hasHiddenData(byte[] bytes) throws NoSuchAlgorithmException, IOException {
-		byte[] topBytes = metafier.sublist(0, 100, bytes);
-		return metafier.verify(topBytes) != Metafier.NOT_FOUND;
 	}
 	
 	public static void printAvailableReaders(String format) {

@@ -1,4 +1,4 @@
-package image.error;
+package error.image;
 
 public class SmallResolutionException extends ImageResolutionException {
 	private static final long serialVersionUID = 3909303422102504812L;

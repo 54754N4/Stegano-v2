@@ -1,4 +1,4 @@
-package audio.error;
+package error.audio;
 
 import javax.sound.sampled.AudioFileFormat;
 

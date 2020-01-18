@@ -2,12 +2,12 @@ package test;
 
 import java.io.File;
 
-import image.AlphaTranscoder;
-import image.BatchLSBTranscoder;
-import image.LSBTranscoder;
-import image.Pixel.Target;
-import model.ImageStegano;
 import model.ParsedResults;
+import model.image.AlphaTranscoder;
+import model.image.BatchLSBTranscoder;
+import model.image.ImageStegano;
+import model.image.LSBTranscoder;
+import model.image.Pixel.Target;
 
 //check dickbaldwin.com
 public class TestImages {

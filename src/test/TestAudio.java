@@ -2,9 +2,9 @@ package test;
 
 import java.io.File;
 
-import audio.LSBTranscoder;
-import model.AudioStegano;
 import model.ParsedResults;
+import model.audio.AudioStegano;
+import model.audio.LSBTranscoder;
 
 public class TestAudio {
 	private static final File song = new File("Under - Alex Hepburn.wav"),	// audio to hide into

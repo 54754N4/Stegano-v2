@@ -1,4 +1,4 @@
-package image.error;
+package error.file;
 
 public class InvalidChecksumException extends Exception {
 	private static final long serialVersionUID = 1102928047377311510L;

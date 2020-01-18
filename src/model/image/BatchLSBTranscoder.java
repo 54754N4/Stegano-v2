@@ -1,6 +1,6 @@
-package image;
+package model.image;
 
-import image.Pixel.Target;
+import model.image.Pixel.Target;
 import util.BitsUtil;
 
 public class BatchLSBTranscoder extends BatchTranscoder {

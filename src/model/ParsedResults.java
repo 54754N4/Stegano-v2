@@ -9,9 +9,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import error.file.ExtractingLengthFailedException;
+import error.file.InvalidChecksumException;
 import file.ExtractedFile;
-import image.error.ExtractingLengthFailedException;
-import image.error.InvalidChecksumException;
 
 public class ParsedResults {
 	private Metafier metafier;

@@ -1,4 +1,4 @@
-package audio;
+package model.audio;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -12,10 +12,10 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import audio.error.SmallAudioCarrierException;
+import error.audio.SmallAudioCarrierException;
 import model.Metafier;
 
-public abstract class PCMTranscoder extends Metafier {
+public abstract class PCMTranscoder extends Metafier<byte[]> {
 	
 	public PCMTranscoder(String sep, int subdivisions) {
 		super(sep, subdivisions);
@@ -24,19 +24,21 @@ public abstract class PCMTranscoder extends Metafier {
 	protected abstract byte hide(byte rawPCM, byte b) throws Exception;
 	protected abstract byte unhide(byte rawPCM);
 	
+	@Override
 	public void verifySize(byte[] rawPCM, byte[] bytes) throws SmallAudioCarrierException {
 		if (bytes.length > rawPCM.length)
 			throw new SmallAudioCarrierException(bytes.length, rawPCM.length);
 		System.out.println("Total bytes/pcm bytes = "+bytes.length+"/"+rawPCM.length);
 	}
 	
+	@Override
+	public byte[] extractHidden(File carrier) throws IOException, UnsupportedAudioFileException {
+		return extractHidden(AudioSystem.getAudioInputStream(carrier));
+	}
+	
 	public byte[] write(byte[] rawPCM, byte[] bytes) throws Exception {
 		for (int i=0; i<bytes.length; i++) rawPCM[i] = hide(rawPCM[i], bytes[i]);
 		return rawPCM;
-	}
-	
-	public byte[] extractHidden(File carrier) throws IOException, UnsupportedAudioFileException {
-		return extractHidden(AudioSystem.getAudioInputStream(carrier));
 	}
 	
 	public byte[] extractHidden(AudioInputStream ais) throws IOException, UnsupportedAudioFileException {

@@ -20,11 +20,11 @@ Text formats:
 # Transcoders
 ```markdown
 # Audio
-audio.LSBTranscoder 		Transcodes in LSB of PCM bytes
+model.audio.LSBTranscoder 		Transcodes in LSB of PCM bytes
 # Image
-image.AlphaTranscoder 		Transcodes in image alpha channel
-image.LSBTranscoder 		Transcodes in LSB of a single colour channel
-image.BatchLSBTranscoder* 	Transcodes in LSB of all colour channels (x4 storage)
+model.image.AlphaTranscoder 		Transcodes in image alpha channel
+model.image.LSBTranscoder 		Transcodes in LSB of a single colour channel
+model.image.BatchLSBTranscoder* 	Transcodes in LSB of all colour channels (x4 storage)
 # Text
 
 ```

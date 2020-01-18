@@ -1,4 +1,4 @@
-package space;
+package model.text;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -16,7 +16,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Whitespace {
+import model.Metafier;
+
+public class CharTranscoder extends Metafier {
+	
+	public CharTranscoder(String sep, int subdivisions) {
+		super(sep, subdivisions);
+	}
+	
+	public static void main(String[] args) {
+		
+	}
+
+	@Override
+	public byte[] extractHidden(File carrier) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}
+
+class Other {
 	private static final String SPACE = " ";
 
 	public static String spaces(int n) {
@@ -62,10 +81,6 @@ public class Whitespace {
 		int count = 0, i = line.length()-1;
 		while (line.length() != 0 && line.charAt(i--) == ' ') count++;
 		return count;
-	}
-	
-	public static void main(String[] args) {
-		
 	}
 }
 

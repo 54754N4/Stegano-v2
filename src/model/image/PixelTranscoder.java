@@ -1,4 +1,4 @@
-package image;
+package model.image;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -7,12 +7,12 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import image.error.ImageWriterNotFoundException;
-import image.error.SmallResolutionException;
+import error.image.ImageWriterNotFoundException;
+import error.image.SmallResolutionException;
 import model.Metafier;
 import util.FastRGB;
 
-public abstract class PixelTranscoder extends Metafier {
+public abstract class PixelTranscoder extends Metafier<BufferedImage> {
 	
 	public PixelTranscoder(String sep, int subdivisions) {
 		super(sep, subdivisions);
@@ -41,12 +41,17 @@ public abstract class PixelTranscoder extends Metafier {
 		return bytes;
 	}
 	
+	@Override
 	public void verifySize(BufferedImage bimage, byte[] bytes) throws SmallResolutionException {
 		int totalPixels = bimage.getWidth() * bimage.getHeight();
 		if (bytes.length > totalPixels)
 			throw new SmallResolutionException(bytes.length, totalPixels);
 		System.out.println("Total bytes/pixels = "+bytes.length+"/"+totalPixels);
-		System.out.println(String.format("Image width/height/ratio = %d/%d/%f",bimage.getWidth(), bimage.getHeight(), bimage.getWidth()/(double) bimage.getHeight()));
+		System.out.println(String.format(
+			"Image width/height/ratio = %d/%d/%f",
+			bimage.getWidth(), 
+			bimage.getHeight(), 
+			bimage.getWidth()/(double) bimage.getHeight()));
 	}
 	
 	public static Pixel[] extractPixels(BufferedImage bimage) throws IOException {

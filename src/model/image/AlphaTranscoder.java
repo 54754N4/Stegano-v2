@@ -1,4 +1,4 @@
-package image;
+package model.image;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
