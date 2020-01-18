@@ -1,21 +1,30 @@
 # Stegano
 A java project to compile multiple stegano techniques
 
-Currently supported formats:
-> Audio file formats: AIFF, AU, WAV, <>MIDI Type 0, MIDI Type 1, and Rich Music Format (RMF) <
-> Image:
-Tested: PNG
-Untested: TIFF, GIF, BMP <
+# Supported Formats
+Currently supported audio formats:
+> Tested: WAV
+> Untested: AIFF, AU, MIDI Type 0, MIDI Type 1 and RMF 
+
+Image formats:
+> Tested: PNG
+> Untested: TIFF, GIF, BMP
+
+Text formats:
+> Tested:
+> Untested:
 
 # Transcoders
 ```markdown
 # Audio
-	audio.LSBTranscoder
+	audio.LSBTranscoder: 		Transcodes in LSB of PCM bytes
 # Image
-	image.AlphaTranscoder
-	image.LSBTranscoder
-	image.BatchLSBTranscoder
+	image.AlphaTranscoder: 		Transcodes in image alpha channel
+	image.LSBTranscoder 		Transcodes in LSB of a single colour channel
+	image.BatchLSBTranscoder* 	Transcodes in LSB of all colour channels (x4 storage)
+# Text
 ```
+*Still in debugging phase
 # Images 
 First get a handle to the payload and carrier files, a copy will be made from the carrier.
 ```java
