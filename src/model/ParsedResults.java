@@ -4,19 +4,20 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 import file.ExtractedFile;
-import image.errors.ExtractingLengthFailedException;
-import image.errors.InvalidChecksumException;
+import image.error.ExtractingLengthFailedException;
+import image.error.InvalidChecksumException;
 
 public class ParsedResults {
 	private Metafier metafier;
-	public byte[] bytes, header, payload;
+	public byte[] bytes, payload;
 	public int subdivisions, length;
-	public String format, checksum;
+	public String format, checksum, header;
 	public ExtractedFile extracted;
 	public File file;
 	
@@ -27,26 +28,32 @@ public class ParsedResults {
 	}
 	
 	private int parseHeader(byte[] hidden) throws ExtractingLengthFailedException {
-		int chain = metafier.verify(10, hidden), end = chain+10;
+		int chain = metafier.verify(metafier.encodedChain.length(), hidden), end = chain+metafier.packets*5;
 		byte[] unmerged = new byte[end];
 		for (int i=0; i<end; i++) unmerged[i] = hidden[i];
-		header = metafier.merge(unmerged);
-		subdivisions = Integer.parseInt(new String(new byte[] {(byte) header[5]}));
+		header = new String(metafier.merge(unmerged), StandardCharsets.UTF_8);
+		String[] split = filter(header.split(metafier.sep+"+"));
+		subdivisions = Integer.parseInt(split[0]);
 		System.out.println(String.format("Subdivisions=%d", subdivisions));
-		format = new String(metafier.sublist(7, 10, header));
+		format = split[1];
 		System.out.println(String.format("Format=%s", format));
-		checksum = new String(metafier.sublist(11, 75, header)).toUpperCase();
+		checksum = split[2].toUpperCase();
 		System.out.println(String.format("Header Checksum=%s", checksum));
-		Matcher m = Pattern.compile("\\d+")	// extract length only (digits)
-			.matcher(new String(metafier.sublist(76, header.length, header)));
-		if (!m.find()) throw new ExtractingLengthFailedException();
-		length = Integer.parseInt(m.group());
+		length = Integer.parseInt(split[3]);
 		System.out.println(String.format("Bytes length=%d", length));
 		return end;
 	}
 	
+	private String[] filter(String[] split) {
+		List<String> strings = new ArrayList<>();
+		for (int i=0; i<split.length; i++) 
+			if (!split[i].equals(""))
+				strings.add(split[i]);
+		return strings.toArray(new String[0]);
+	}
+	
 	private void separatePayload(int start) throws NoSuchAlgorithmException, IOException, InvalidChecksumException {
-		byte[] unmerged = new byte[length*2];
+		byte[] unmerged = new byte[length*metafier.packets];
 		for (int i=start, c=0; i<start+unmerged.length; i++, c++) unmerged[c] = bytes[i];
 		payload = metafier.merge(unmerged);
 		extracted = new ExtractedFile(payload);
