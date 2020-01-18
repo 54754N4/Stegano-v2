@@ -44,6 +44,7 @@ File carrier = is.hide(payload, image, "newImage.png","png");
 System.out.println("Carrier="+carrier.getName());			
 ```
 After that you can extract the results from the carrier file by passing it to an IS instance with the appropriate metafier to decode the data. ParsedResults contains much more info on the extracted data.
+Note: Different IS instances can be used for encoding and decoding separately if and only if both instances have been created using the same separator and subdivision bits.
 ```java
 ParsedResults extracted = is.extractFile(carrier);  // extracts data from carrier file
 System.out.println("Hidden="+extracted.file.getName()); 
