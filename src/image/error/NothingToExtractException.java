@@ -1,4 +1,4 @@
-package image.errors;
+package image.error;
 
 import java.io.IOException;
 
