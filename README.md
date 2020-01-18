@@ -1,24 +1,37 @@
 # Stegano
 A java project to compile multiple stegano techniques
 
-Currently: Only image steganography is done for now
+Currently supported formats:
+> Audio:
+Audio file formats: AIFF, AU and WAV
+Music file formats: MIDI Type 0, MIDI Type 1, and Rich Music Format (RMF)
+> Image:
+Tested: PNG
+Untested: TIFF, GIF, BMP
 
+# Techniques Breakdown
+```markdown
+# Audio
+	audio.LSBTranscoder
+# Image
+	image.AlphaTranscoder
+	image.LSBTranscoder
+	image.BatchLSBTranscoder
+```
 # Images 
 First get a handle to the payload and carrier files, a copy will be made from the carrier.
 ```java
 File image = new File("bigimagepf.bmp"),    // image to hide into
     payload = new File("aFile.txt");        // file to hide 
 ```
-Then create an ImageStegano instance passing it the technique to use for hiding, in this case AlphaMetafier is used to hide using the transparency bit of pixels.
+Then create an ImageStegano (IS) instance passing it the technique to use for encoding and decoding. In this case AlphaTranscoder is used to hide using the transparency bit (alpha color channel) of each pixel.
 ```java
-// Infusion
-ImageStegano is = new ImageStegano(new AlphaMetafier("#"));	// separator-> metadata + payload 
+ImageStegano is = new ImageStegano(new AlphaMetafier("#"));		// separator used for metadata + payload 
 File carrier = is.hide(payload, image, "newImage.png","png"); 
 System.out.println("Carrier="+carrier.getName());			
 ```
 After that you can extract the results from the carrier file by passing it to an IS instance with the appropriate metafier to decode the data. ParsedResults contains much more info on the extracted data.
 ```java
-// Extraction
 ParsedResults extracted = is.extractFile(carrier);  // extracts data from carrier file
 System.out.println("Hidden="+extracted.file.getName()); 
  ```
