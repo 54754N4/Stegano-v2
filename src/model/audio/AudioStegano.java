@@ -14,6 +14,7 @@ public class AudioStegano extends Stegano {
 	
 	public AudioStegano(PCMTranscoder metafier) {
 		super(metafier);
+		this.metafier = metafier;
 	}
 	
 	public File hide(File payload, File carrier, String name, String format) throws Exception {

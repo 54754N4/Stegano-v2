@@ -12,7 +12,7 @@ import error.image.SmallResolutionException;
 import model.Metafier;
 import util.FastRGB;
 
-public abstract class PixelTranscoder extends Metafier<BufferedImage> {
+public abstract class PixelTranscoder extends Metafier {
 	
 	public PixelTranscoder(String sep, int subdivisions) {
 		super(sep, subdivisions);
@@ -41,7 +41,6 @@ public abstract class PixelTranscoder extends Metafier<BufferedImage> {
 		return bytes;
 	}
 	
-	@Override
 	public void verifySize(BufferedImage bimage, byte[] bytes) throws SmallResolutionException {
 		int totalPixels = bimage.getWidth() * bimage.getHeight();
 		if (bytes.length > totalPixels)

@@ -23,7 +23,7 @@ public abstract class Stegano {
 	}
 	
 	// verifies if our encoded metafier chain is unpacked in the first bytes
-	public boolean hasHiddenData(byte[] bytes) throws NoSuchAlgorithmException, IOException {
+	private boolean hasHiddenData(byte[] bytes) throws NoSuchAlgorithmException, IOException {
 		byte[] topBytes = metafier.sublist(0, 400, bytes);
 		return metafier.verify(topBytes) != Metafier.NOT_FOUND;
 	}

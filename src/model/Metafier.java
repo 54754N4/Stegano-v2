@@ -1,5 +1,6 @@
 package model;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -113,4 +114,6 @@ public abstract class Metafier {
 		}
 		return pos;
 	}
+	
+	public abstract byte[] extractHidden(File carrier) throws Exception;
 }

@@ -15,7 +15,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import error.audio.SmallAudioCarrierException;
 import model.Metafier;
 
-public abstract class PCMTranscoder extends Metafier<byte[]> {
+public abstract class PCMTranscoder extends Metafier {
 	
 	public PCMTranscoder(String sep, int subdivisions) {
 		super(sep, subdivisions);
@@ -24,7 +24,6 @@ public abstract class PCMTranscoder extends Metafier<byte[]> {
 	protected abstract byte hide(byte rawPCM, byte b) throws Exception;
 	protected abstract byte unhide(byte rawPCM);
 	
-	@Override
 	public void verifySize(byte[] rawPCM, byte[] bytes) throws SmallAudioCarrierException {
 		if (bytes.length > rawPCM.length)
 			throw new SmallAudioCarrierException(bytes.length, rawPCM.length);
