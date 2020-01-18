@@ -4,14 +4,17 @@ A java project to compile multiple stegano techniques
 # Supported Formats
 Currently supported audio formats:
 > Tested: WAV
+
 > Untested: AIFF, AU, MIDI Type 0, MIDI Type 1 and RMF 
 
 Image formats:
 > Tested: PNG
+
 > Untested: TIFF, GIF, BMP
 
 Text formats:
 > Tested:
+
 > Untested:
 
 # Transcoders
