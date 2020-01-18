@@ -2,14 +2,12 @@
 A java project to compile multiple stegano techniques
 
 Currently supported formats:
-> Audio:
-Audio file formats: AIFF, AU and WAV
-Music file formats: MIDI Type 0, MIDI Type 1, and Rich Music Format (RMF)
+> Audio file formats: AIFF, AU, WAV, <>MIDI Type 0, MIDI Type 1, and Rich Music Format (RMF) <
 > Image:
 Tested: PNG
-Untested: TIFF, GIF, BMP
+Untested: TIFF, GIF, BMP <
 
-# Techniques Breakdown
+# Transcoders
 ```markdown
 # Audio
 	audio.LSBTranscoder
