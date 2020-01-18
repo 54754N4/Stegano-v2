@@ -1,0 +1,79 @@
+public interface BinarySearchTreeContract<K extends Comparable<K>, V> extends BinaryTreeContract<V> {
+	K getKey();
+	BinarySearchTreeContract<K,V> createNode(K key, V value);
+	BinarySearchTreeContract<K,V> getLeft();
+	BinarySearchTreeContract<K,V> getRight();
+	BinarySearchTreeContract<K,V> getParent();
+	BinarySearchTreeContract<K,V> setKey(K key);
+	BinarySearchTreeContract<K,V> setValue(V value);
+	BinarySearchTreeContract<K,V> setLeft(BinarySearchTreeContract<K, V> node);
+	BinarySearchTreeContract<K,V> setRight(BinarySearchTreeContract<K, V> node);
+	BinarySearchTreeContract<K,V> setParent(BinarySearchTreeContract<K, V> node);
+	
+	// Fall-through
+	
+	@Override
+	default BinarySearchTreeContract<K, V> setParent(BinaryTreeContract<V> node) {
+		return setParent((BinarySearchTreeContract<K, V>) node);
+	}
+	
+	@Override 
+	default BinarySearchTreeContract<K,V> setRight(BinaryTreeContract<V> node) {
+		return setRight((BinarySearchTreeContract<K,V>) node);
+	}
+	
+	@Override
+	default BinarySearchTreeContract<K,V> setLeft(BinaryTreeContract<V> node) {
+		return setLeft((BinarySearchTreeContract<K,V>) node);
+	}
+	
+	// Funcs
+	
+	default BinarySearchTreeContract<K,V> search(K key) {
+		if (getKey().compareTo(key) == 0) 
+			return this;
+		else if (getKey().compareTo(key) < 0 && getLeft() != null) 
+			return getLeft().search(key);
+		else if (getKey().compareTo(key) > 0 && getRight() != null) 
+			return getRight().search(key);
+		else return null;	// not found
+	}
+	
+	default List<BinarySearchTreeContract<K,V>> search(V value) {
+		List<BinarySearchTreeContract<K,V>> matches = new ArrayList<>(), submatches;
+		if (getValue() == value) 
+			matches.add(this);
+		if (getLeft() != null && (submatches = getLeft().search(value)) != null) 
+			matches.addAll(submatches);
+		if (getRight() != null && (submatches = getRight().search(value)) != null) 
+			matches.addAll(submatches);
+		return matches;
+	}	
+	
+	default void insert(K key, V value) {
+		if (getKey().equals(key)) setValue(value);
+		else if (key.compareTo(getKey()) < 0) {	// handle left-insertion
+			if (getLeft() == null) setLeft(createNode(key, value));
+			else getLeft().insert(key, value);
+		} else if (key.compareTo(getKey()) > 0) { // handle right-insertion
+			if (getRight() == null) setRight(createNode(key, value));
+			else getRight().insert(key, value);
+		}
+	}
+	
+	default BinarySearchTreeContract<K, V> findLeftwiseMinimum() {
+		BinarySearchTreeContract<K, V> minNode = this;
+		while (minNode.getLeft() != null) minNode = minNode.getLeft();
+		return minNode;
+	}
+	
+	@Override
+	default String simpleRepresentation() {
+		if (isLeaf()) return "("+getValue()+")";
+		String left, value, right;
+		left = (getLeft() != null) ? getLeft().simpleRepresentation()+"," : "";
+		value = getValue().toString();
+		right = (getRight() != null) ? ","+getRight().simpleRepresentation() : "";
+		return String.format("(%s%s%s)", left, value, right);
+	}
+}
