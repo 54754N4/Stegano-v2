@@ -78,15 +78,48 @@ public class Conversions {
 		return hex2byte(hex);
 	}
 
-	public static void main(String[] args) {
-		byte[] bytes = {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
-		for (int i=0; i<bytes.length; i++)
-			for (int j=0; j<bytes.length; j++)
-				System.out.println(
-					String.format(
-						"%s + %s = %s", 
-						singleHex(bytes[i]), 
-						singleHex(bytes[j]),
-						byte2hex(merge(bytes[i], bytes[j]))));
+	public static String toBinary(byte num) {
+		return String.format("%8s", Integer.toBinaryString(num)).replace(' ', '0');
 	}
+	
+	public static int nearestMultipleOf(double multiple, int x) {
+		return (int) (multiple*Math.ceil(x/multiple));
+	}
+	
+	public static byte[][] pack(byte[] bytes) {
+		int c = 0, size = Conversions.nearestMultipleOf(4, bytes.length)/4;
+		byte[][] packed = new byte[size][];
+		byte[] buffer = new byte[4];		// buffer of 4 atoms
+		for (int i=0; i<bytes.length; i++) {
+			buffer[i%4] = bytes[i];
+			if (i%4 == 3 && i != 0) {
+				packed[c++] = buffer;
+				buffer = new byte[4];
+			}
+		}
+		while (c < size) buffer[c++%4] = 0; // pad rest with zeros
+		if (c < size) packed[c] = buffer;	// add last buffer
+		return packed;
+	}
+	
+	public static byte[] flatten(byte[][] map) {
+		byte[] flat = new byte[map.length*4]; // each pixel stores 4 atoms
+		for (int i=0, c=0; i<map.length; i++)
+			for (int j=0; j<map[i].length; j++)
+				flat[c++] = map[i][j];
+		return flat;
+	}
+	
+//	public static void main(String[] args) {
+//		byte[] bytes = {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
+//		for (int i=0; i<bytes.length; i++)
+//			System.out.println(toBinary(bytes[i]));
+////			for (int j=0; j<bytes.length; j++)
+////				System.out.println(
+////					String.format(
+////						"%s + %s = %s", 
+////						singleHex(bytes[i]), 
+////						singleHex(bytes[j]),
+////						byte2hex(merge(bytes[i], bytes[j]))));
+//	}
 }
