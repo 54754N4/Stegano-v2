@@ -12,26 +12,25 @@ import javax.imageio.ImageReader;
 import javax.imageio.ImageWriter;
 
 import file.Payload;
-import image.ImageMetafier;
-import image.errors.ImageWriterNotFoundException;
-import image.errors.InvalidChecksumException;
-import image.errors.NothingToExtractException;
+import image.PixelTranscoder;
+import image.error.InvalidChecksumException;
+import image.error.NothingToExtractException;
 
 public class ImageStegano {
-	private ImageMetafier metafier;
+	private PixelTranscoder metafier;
 	
-	public ImageStegano(ImageMetafier metafier) {
+	public ImageStegano(PixelTranscoder metafier) {
 		this.metafier = metafier;
 	}
 	
 	public File hide(File payload, File image, String name, String format) throws Exception {
-		BufferedImage bimage = ImageMetafier.getWriteableImage(image);
+		BufferedImage bimage = PixelTranscoder.getWriteableImage(image); // isAlphaPre false ???
 		byte[] bytes = metafier.metafy(new Payload(payload));
 		metafier.verifySize(bimage, bytes);
 		System.out.println("Size is valid, Encoding data..");
 		metafier.write(bimage, bytes);
 		System.out.println("Encoded data, saving image..");
-		return save(bimage, name, format);
+		return metafier.save(bimage, name, format);
 	}
 	
 	public ParsedResults extractFile(File image) throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidChecksumException {
@@ -41,7 +40,7 @@ public class ImageStegano {
 		return new ParsedResults(metafier, hidden);
 	}
 	
-	// verifies if our encoded metafier chain is unpacked in the first pixels
+	// verifies if our encoded metafier chain is unpacked in the first bytes
 	public boolean hasHiddenData(byte[] bytes) throws NoSuchAlgorithmException, IOException {
 		byte[] topBytes = metafier.sublist(0, 100, bytes);
 		return metafier.verify(topBytes) != Metafier.NOT_FOUND;
@@ -59,10 +58,11 @@ public class ImageStegano {
 			System.out.println("writer: "+ writers.next());
 	}
 	
-	public File save(BufferedImage bimage, String name, String format) throws IOException {
-		File out = new File(name);
-		if (!ImageIO.write(bimage, format, out))
-			throw new ImageWriterNotFoundException(format);
-		return out;
+	public static void main(String[] args) {
+		String format = "dwg";
+		System.out.println("Readers:");
+		ImageStegano.printAvailableReaders(format);
+		System.out.println("Writers:");
+		ImageStegano.printAvailableWriters(format);
 	}
 }
