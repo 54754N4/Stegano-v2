@@ -1,18 +1,32 @@
 package model;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 import file.Payload;
-import util.Conversions;
+import util.BitsUtil;
 
 public abstract class Metafier {
+	private static final List<Integer> VALID_SUBDIVISIONS = Arrays.asList(1,2,4,8);
 	public static final int NOT_FOUND = -1, CHAIN_SIZE = 5;
-	public final String sep, hexSep;
+	public final String sep, encodedChain;
+	protected final int subdivisions, packets;
 	
-	public Metafier(String sep) {
+	public Metafier(String sep, int subdivisions) {
 		this.sep = sep;
-		hexSep = Conversions.byte2hex(sep.getBytes(Charset.forName("UTF-8"))[0]);
+		if (!VALID_SUBDIVISIONS.contains(subdivisions))
+			throw new IllegalArgumentException("Has to be a power of 2 <= 8");
+		this.subdivisions = subdivisions;
+		packets = 8/subdivisions;
+		String encodedSep = "", pattern = "";
+		for (int b : BitsUtil.subdivide(
+				sep.getBytes(StandardCharsets.UTF_8)[0], 
+				subdivisions))
+			encodedSep += b;
+		for (int i=0; i<CHAIN_SIZE; i++) 
+			pattern += encodedSep;
+		encodedChain = pattern;
 	}
 	
 	public byte[] metafy(Payload payload) {
@@ -23,14 +37,14 @@ public abstract class Metafier {
 		int c = 0;
 		for (byte b : headerBytes) total[c++] = b;
 		for (byte b : payload.fileBytes) total[c++] = b;
-		return total;
+		return subdivide(total);
 	}
 	
 	protected String buildHeader(Payload payload) {
 		String chain = chain(CHAIN_SIZE);
 		StringBuilder sb = new StringBuilder();
 		sb.append(chain);
-		sb.append(2);
+		sb.append(subdivisions);
 		sb.append(sep);
 		sb.append(payload.format);				// has to be size 3
 		sb.append(sep);
@@ -41,14 +55,32 @@ public abstract class Metafier {
 		return sb.toString();
 	}
 	
-	public byte[] merge(byte[] unpacked) {
-		return unpacked;
-	}
-	
 	public String chain(int n) {
 		StringBuilder sb = new StringBuilder();
 		while (n-->0) sb.append(sep);
 		return sb.toString();
+	}
+	
+	public byte[] merge(byte[] unpacked) {
+		System.out.println(String.format("Packing %d into %d bytes", unpacked.length, unpacked.length/packets));
+		byte[] packed = new byte[unpacked.length/packets];
+		int[] buffer = new int[packets];
+		for (int i=0, c=0; i<unpacked.length; i+=packets) {
+			for (int j=0; j<packets; j++) 
+				buffer[j] = unpacked[i+j];
+			packed[c++] = (byte) BitsUtil.merge(buffer, subdivisions);
+		}
+		return packed;
+	}
+	
+	public byte[] subdivide(byte[] bytes) {
+		System.out.println(String.format("Subdividing %d into %d bytes", bytes.length, bytes.length*packets));
+		int c = 0;
+		byte[] divided = new byte[bytes.length*packets];
+		for (byte aByte : bytes)
+			for (int b : BitsUtil.subdivide(aByte, subdivisions))
+				divided[c++] = (byte) b;
+		return divided;
 	}
 	
 	public byte[] sublist(int start, int end, byte[] bytes) {
@@ -70,13 +102,12 @@ public abstract class Metafier {
 	 * @return index where chain pattern matched
 	 */
 	public int verify(int start, byte[] bytes) {
-		String pattern = "", match = "";
-		for (int i=0; i<CHAIN_SIZE; i++) pattern += hexSep;
-		int pos = NOT_FOUND, count = pattern.length();
+		String match = "";
+		int pos = NOT_FOUND, count = encodedChain.length();
 		for (int i=start; i<bytes.length-count; i++, match="") {
 			for (int di=0; di<count; di++) {
-				match += Integer.toHexString(bytes[i+di]);
-				if (match.equals(pattern)) 
+				match += bytes[i+di];
+				if (match.equals(encodedChain)) 
 					return i;
 			}
 		}
