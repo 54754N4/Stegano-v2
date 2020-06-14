@@ -5,9 +5,9 @@ import java.io.File;
 import model.Stegano;
 
 public class TextStegano extends Stegano {
-	private CharTranscoder metafier;
+	private LineTranscoder metafier;
 	
-	public TextStegano(CharTranscoder metafier) {
+	public TextStegano(LineTranscoder metafier) {
 		super(metafier);
 		this.metafier = metafier;
 	}
