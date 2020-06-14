@@ -16,9 +16,9 @@ public class TestImages {
 	
 	public static void main(String[] args) throws Exception {
 		testAlpha();
-		System.out.println();
-		testLSB();
-		System.out.println();
+//		System.out.println();
+//		testLSB();
+//		System.out.println();
 //		testLSB2();
 	}
 	
